@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LION's MARKET POS</title>
+    <script>
+      (() => {
+        try {
+          const key = "lionsmarket.theme";
+          const stored = localStorage.getItem(key);
+          const theme = stored === "dark" || stored === "light"
+            ? stored
+            : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+    <script src="https://js.paystack.co/v2/inline.js"></script>
+    <link rel="stylesheet" href="/styles/main.css" />
+  </head>
+  <body>
+    <section id="authScreen" class="auth-shell">
+      <form id="loginForm" class="auth-card">
+        <div class="brand-center">
+          <span class="brand-mark">LM</span>
+          <h2>LION's MARKET POS</h2>
+        </div>
+
+        <label>
+          <span>Username</span>
+          <input id="loginUsername" type="text" autocomplete="username" required />
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+        </label>
+
+        <button class="btn btn-primary" type="submit">Sign In</button>
+        <p id="loginStatus" class="status-text" data-tone="info"></p>
+      </form>
+    </section>
+
+    <div id="appShell" class="app-shell is-hidden">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">LM</span>
+          <h2>LION's MARKET POS</h2>
+        </div>
+
+        <nav id="navTabs" class="nav-tabs" aria-label="Application sections"></nav>
+      </aside>
+
+      <div class="main-shell">
+        <header class="topbar">
+          <div>
+            <h1 id="storeHeading">LION's MARKET POS</h1>
+            <p id="statusLine" class="status-text" data-tone="info"></p>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="themeToggleBtn" class="btn btn-secondary theme-toggle" type="button">Dark</button>
+            <div id="userBadge" class="user-badge">Signed out</div>
+            <button id="logoutBtn" class="btn btn-ghost" type="button">Logout</button>
+          </div>
+        </header>
+
+        <main class="content">
+          <section id="posView" class="view-panel" data-view="pos">
+            <div class="dashboard-grid">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Sell Items</p>
+                    <h3>Product Catalog</h3>
+                  </div>
+                </div>
+
+                <div class="toolbar toolbar-single">
+                  <label class="full-span">
+                    <span>Search products</span>
+                    <input id="productSearch" type="search" placeholder="Search or scan barcode" />
+                  </label>
+                </div>
+
+                <div id="productCatalog" class="product-grid"></div>
+              </div>
+
+              <div class="panel checkout-panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Checkout</p>
+                    <h3>Current Sale</h3>
+                  </div>
+                </div>
+
+                <div class="checkout-hero">
+                  <div class="checkout-copy">
+                    <h4>Checkout</h4>
+                  </div>
+                  <div id="checkoutMeta" class="checkout-meta"></div>
+                </div>
+
+                <div class="form-grid checkout-form-grid">
+                  <label>
+                    <span>Customer</span>
+                    <select id="saleCustomer"></select>
+                  </label>
+
+                  <label>
+                    <span>Discount (%)</span>
+                    <input id="discountInput" type="number" min="0" max="50" step="1" />
+                  </label>
+
+                  <label>
+                    <span>Payment method</span>
+                    <select id="paymentMethod"></select>
+                  </label>
+
+                  <label id="amountTenderedLabel">
+                    <span>Amount tendered</span>
+                    <input id="amountTendered" type="number" min="0" step="0.01" />
+                  </label>
+                </div>
+
+                <div id="checkoutNote" class="checkout-note"></div>
+
+                <div id="cartList" class="cart-list"></div>
+                <div id="cartTotals" class="totals-card"></div>
+
+                <div class="action-row">
+                  <button id="clearCartBtn" class="btn btn-ghost" type="button">Clear Cart</button>
+                  <button id="checkoutBtn" class="btn btn-primary" type="button">Complete Sale</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Receipt</p>
+                  <h3>Latest Receipt</h3>
+                </div>
+                <button id="printReceiptBtn" class="btn btn-secondary" type="button">Open Receipt</button>
+              </div>
+
+              <div id="receiptPreview" class="receipt-preview"></div>
+            </div>
+          </section>
+
+          <section id="productsView" class="view-panel" data-view="products">
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Current Catalog</p>
+                    <h3>Product Table</h3>
+                  </div>
+                </div>
+
+                <div id="productStats" class="stats-grid"></div>
+                <div id="productTable" class="table-wrap"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Catalog Editor</p>
+                    <h3>Products</h3>
+                  </div>
+                </div>
+
+                <form id="productForm" class="form-grid">
+                  <input id="productId" type="hidden" />
+                  <input id="productDescription" type="hidden" value="" />
+
+                  <label>
+                    <span>Name</span>
+                    <input id="productName" type="text" required />
+                  </label>
+
+                  <label>
+                    <span>Category</span>
+                    <input id="productCategory" type="text" required />
+                  </label>
+
+                  <label>
+                    <span>Supplier</span>
+                    <input id="productSupplier" type="text" required />
+                  </label>
+
+                  <label>
+                    <span>Price</span>
+                    <input id="productPrice" type="number" min="0" step="0.01" required />
+                  </label>
+
+                  <label>
+                    <span>Stock</span>
+                    <input id="productStock" type="number" min="0" step="1" required />
+                  </label>
+
+                  <label>
+                    <span>Barcode</span>
+                    <input id="productBarcode" type="text" required />
+                  </label>
+
+                  <div class="action-row full-span">
+                    <button id="resetProductFormBtn" class="btn btn-ghost" type="button">Reset</button>
+                    <button class="btn btn-primary" type="submit">Save Product</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section id="customersView" class="view-panel" data-view="customers">
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Relationships</p>
+                    <h3>Customer Activity</h3>
+                  </div>
+                </div>
+
+                <div id="customerTable" class="table-wrap"></div>
+                <div id="customerHistory" class="history-card"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Customer Records</p>
+                    <h3>Customers</h3>
+                  </div>
+                </div>
+
+                <form id="customerForm" class="form-grid">
+                  <input id="customerId" type="hidden" />
+
+                  <label>
+                    <span>Name</span>
+                    <input id="customerName" type="text" required />
+                  </label>
+
+                  <label>
+                    <span>Phone</span>
+                    <input id="customerPhone" type="tel" />
+                  </label>
+
+                  <label>
+                    <span>Email</span>
+                    <input id="customerEmail" type="email" />
+                  </label>
+
+                  <label>
+                    <span>Loyalty points</span>
+                    <input id="customerPoints" type="number" min="0" step="1" />
+                  </label>
+
+                  <label class="full-span">
+                    <span>Address</span>
+                    <textarea id="customerAddress" rows="3"></textarea>
+                  </label>
+
+                  <div class="action-row full-span">
+                    <button id="resetCustomerFormBtn" class="btn btn-ghost" type="button">Reset</button>
+                    <button class="btn btn-primary" type="submit">Save Customer</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section id="inventoryView" class="view-panel" data-view="inventory">
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Stock Snapshot</p>
+                    <h3>Inventory Table</h3>
+                  </div>
+                </div>
+
+                <div id="inventoryStats" class="stats-grid"></div>
+                <div id="inventoryTable" class="table-wrap"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Inventory</p>
+                    <h3>Stock Adjustments</h3>
+                  </div>
+                </div>
+
+                <form id="inventoryForm" class="form-grid">
+                  <label class="full-span">
+                    <span>Product</span>
+                    <select id="inventoryProduct"></select>
+                  </label>
+
+                  <label>
+                    <span>Action</span>
+                    <select id="inventoryMode">
+                      <option value="restock">Restock</option>
+                      <option value="set">Set stock level</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Quantity</span>
+                    <input id="inventoryQuantity" type="number" min="0" step="1" required />
+                  </label>
+
+                  <input id="inventoryNote" type="hidden" value="" />
+
+                  <div class="action-row full-span">
+                    <button class="btn btn-primary" type="submit">Update Inventory</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section id="usersView" class="view-panel" data-view="users">
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Access Control</p>
+                    <h3>User Accounts</h3>
+                  </div>
+                </div>
+
+                <div id="userStats" class="stats-grid"></div>
+                <div id="userTable" class="table-wrap"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Admin</p>
+                    <h3>Team Access</h3>
+                  </div>
+                </div>
+
+                <form id="userForm" class="form-grid">
+                  <input id="userId" type="hidden" />
+
+                  <label>
+                    <span>Full name</span>
+                    <input id="userName" type="text" required />
+                  </label>
+
+                  <label>
+                    <span>Username</span>
+                    <input id="userUsername" type="text" autocomplete="username" required />
+                  </label>
+
+                  <label>
+                    <span>Role</span>
+                    <select id="userRole" required>
+                      <option value="cashier">Cashier</option>
+                      <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    <span>Password</span>
+                    <input id="userPassword" type="password" autocomplete="new-password" minlength="6" required />
+                  </label>
+
+                  <div class="action-row full-span">
+                    <button id="resetUserFormBtn" class="btn btn-ghost" type="button">Reset</button>
+                    <button id="saveUserBtn" class="btn btn-primary" type="submit">Create User</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section id="salesView" class="view-panel" data-view="sales">
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Transactions</p>
+                    <h3>Recent Sales</h3>
+                  </div>
+                </div>
+
+                <div id="salesTable" class="table-wrap"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Receipt Lookup</p>
+                    <h3>Selected Receipt</h3>
+                  </div>
+                </div>
+
+                <div id="salesReceipt" class="receipt-preview"></div>
+              </div>
+            </div>
+          </section>
+
+          <section id="reportsView" class="view-panel" data-view="reports">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Performance</p>
+                  <h3>Reports</h3>
+                </div>
+              </div>
+
+              <div id="reportSummary" class="stats-grid"></div>
+            </div>
+
+            <div class="dashboard-grid stacked-dashboard">
+              <div class="panel">
+                <div class="panel-header">
+                  <h3>Product Performance</h3>
+                </div>
+                <div id="productPerformanceTable" class="table-wrap"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <h3>Cashier Performance</h3>
+                </div>
+                <div id="cashierPerformanceTable" class="table-wrap"></div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

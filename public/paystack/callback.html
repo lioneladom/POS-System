@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Returning to LION's MARKET POS</title>
+    <script>
+      (() => {
+        try {
+          const theme = localStorage.getItem("lionsmarket.theme");
+          document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <style>
+      :root {
+        font-family: Inter, system-ui, sans-serif;
+        color-scheme: light;
+        --bg: #f4f1ea;
+        --panel: rgba(255, 255, 255, 0.92);
+        --ink: #181714;
+        --muted: #6f6a61;
+        --line: rgba(24, 23, 20, 0.08);
+        --shadow: 0 24px 60px rgba(35, 29, 20, 0.12);
+      }
+
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #0f1313;
+        --panel: rgba(23, 29, 29, 0.94);
+        --ink: #ebf1ef;
+        --muted: #9aa8a5;
+        --line: rgba(107, 208, 187, 0.18);
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      main {
+        width: min(92vw, 420px);
+        padding: 32px 28px;
+        border-radius: 20px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 1.25rem;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Finishing your payment</h1>
+      <p>Returning to LION's MARKET POS so the receipt can be completed.</p>
+    </main>
+
+    <script>
+      const messageType = "campusmart.paystackComplete";
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get("reference") || params.get("trxref") || "";
+
+      if (window.opener && reference) {
+        window.opener.postMessage({ type: messageType, reference }, window.location.origin);
+        window.close();
+      } else {
+        const nextUrl = new URL("/", window.location.origin);
+        nextUrl.searchParams.set("paystack", "resume");
+        if (reference) {
+          nextUrl.searchParams.set("reference", reference);
+        }
+        window.location.replace(nextUrl.toString());
+      }
+    </script>
+  </body>
+</html>

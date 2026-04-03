@@ -1,0 +1,17 @@
+{
+  "name": "campus-mart-pos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env server/server.js",
+    "dev": "node --env-file=.env --watch server/server.js",
+    "db:setup": "node --env-file=.env scripts/setup-db.js",
+    "db:reset": "node --env-file=.env scripts/setup-db.js --reset"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
+  }
+}
